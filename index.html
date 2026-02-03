@@ -1,54 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ruman Raees Web Services</title>
-<style>
-body {
-  background: black;
-  color: #00ff99;
-  font-family: monospace;
-  text-align: center;
-}
-.card {
-  border: 1px solid #00ff99;
-  margin: 20px;
-  padding: 20px;
-}
-button {
-  background: #00ff99;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>Ruman Raees Bot</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      background: #020617;
+      color: #22d3ee;
+      font-family: monospace;
+      text-align: center;
+    }
+    img {
+      margin-top: 20px;
+      border: 5px solid #22d3ee;
+    }
+  </style>
 </head>
-
 <body>
-<h1>💻 Ruman Raees Web Services</h1>
 
-<div class="card">
-<h2>1️⃣ Cheap Website</h2>
-<p>Price: 1000 PKR</p>
-<button onclick="buy(1)">Buy Now</button>
-</div>
-
-<div class="card">
-<h2>2️⃣ Pro Website</h2>
-<p>Price: 3000 PKR</p>
-<button onclick="buy(2)">Buy Now</button>
-</div>
-
-<div class="card">
-<h2>3️⃣ Ultimate Website</h2>
-<p>Price: 5000 PKR</p>
-<button onclick="buy(3)">Buy Now</button>
-</div>
+<h1>🤖 Ruman Raees WhatsApp Bot</h1>
+<p id="status">Waiting for QR...</p>
+<img id="qr" />
 
 <script>
-function buy(pkg) {
-  window.location.href =
-   `https://wa.me/923158479223?text=Hi%20I%20want%20package%20${pkg}`
-}
+  const socket = io()
+
+  socket.on("qr", qr => {
+    document.getElementById("qr").src = qr
+    document.getElementById("status").innerText =
+      "📱 Scan QR from WhatsApp"
+  })
+
+  socket.on("status", msg => {
+    document.getElementById("status").innerText = msg
+  })
 </script>
+
 </body>
-  </html>
+</html>

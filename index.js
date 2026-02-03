@@ -1,72 +1,62 @@
-import makeWASocket, { useMultiFileAuthState } from "@whiskeysockets/baileys"
+import makeWASocket, {
+  useMultiFileAuthState,
+  DisconnectReason
+} from "@whiskeysockets/baileys"
 
-const startBot = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState("auth")
-  const sock = makeWASocket({ auth: state })
+import express from "express"
+import http from "http"
+import { Server } from "socket.io"
+import QRCode from "qrcode"
+import Pino from "pino"
+
+const app = express()
+const server = http.createServer(app)
+const io = new Server(server)
+
+app.use(express.static("public"))
+
+async function startBot() {
+  const { state, saveCreds } =
+    await useMultiFileAuthState("./auth")
+
+  const sock = makeWASocket({
+    auth: state,
+    logger: Pino({ level: "silent" }),
+    browser: ["Ruman Raees Bot", "Chrome", "1.0.0"]
+  })
 
   sock.ev.on("creds.update", saveCreds)
 
-  sock.ev.on("messages.upsert", async ({ messages }) => {
-    const msg = messages[0]
-    if (!msg.message || msg.key.fromMe) return
+  sock.ev.on("connection.update", async (update) => {
+    const { connection, qr, lastDisconnect } = update
 
-    const text = msg.message.conversation?.toLowerCase()
-    const jid = msg.key.remoteJid
-
-    // START
-    if (text === "hi" || text === "hello") {
-      await sock.sendMessage(jid, {
-        text:
-`👋 *Welcome to Ruman Raees Web Services*
-
-Choose a package:
-1️⃣ Cheap Website – 1000 PKR
-2️⃣ Pro Website – 3000 PKR
-3️⃣ Ultimate Website – 5000 PKR
-
-Reply with *1, 2 or 3*`
-      })
+    if (qr) {
+      const qrImage = await QRCode.toDataURL(qr)
+      io.emit("qr", qrImage)
+      console.log("📸 QR sent to website")
     }
 
-    // OPTION 1
-    if (text === "1") {
-      await sock.sendMessage(jid, {
-        text:
-`✅ *Cheap Website Selected*
-
-💰 Price: 1000 PKR
-📲 Easypaisa: *03158479223*
-
-Send payment screenshot after payment.`
-      })
+    if (connection === "open") {
+      io.emit("status", "✅ WhatsApp Connected")
+      console.log("✅ Bot connected")
     }
 
-    // OPTION 2
-    if (text === "2") {
-      await sock.sendMessage(jid, {
-        text:
-`🔥 *Pro Website Selected*
+    if (connection === "close") {
+      const reason =
+        lastDisconnect?.error?.output?.statusCode
 
-💰 Price: 3000 PKR
-📲 Easypaisa: *03158479223*
-
-Send payment screenshot.`
-      })
-    }
-
-    // OPTION 3
-    if (text === "3") {
-      await sock.sendMessage(jid, {
-        text:
-`🚀 *Ultimate Website Selected*
-
-💰 Price: 5000 PKR
-📲 Easypaisa: *03158479223*
-
-Send payment screenshot.`
-      })
+      if (reason !== DisconnectReason.loggedOut) {
+        startBot()
+      } else {
+        console.log("❌ Logged out, delete auth folder")
+      }
     }
   })
 }
 
 startBot()
+
+const PORT = process.env.PORT || 3000
+server.listen(PORT, () => {
+  console.log("🌐 Website running on port " + PORT)
+})

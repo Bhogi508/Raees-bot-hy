@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ruman Raees Web Services</title>
+<style>
+body {
+  background: black;
+  color: #00ff99;
+  font-family: monospace;
+  text-align: center;
+}
+.card {
+  border: 1px solid #00ff99;
+  margin: 20px;
+  padding: 20px;
+}
+button {
+  background: #00ff99;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+<h1>💻 Ruman Raees Web Services</h1>
+
+<div class="card">
+<h2>1️⃣ Cheap Website</h2>
+<p>Price: 1000 PKR</p>
+<button onclick="buy(1)">Buy Now</button>
+</div>
+
+<div class="card">
+<h2>2️⃣ Pro Website</h2>
+<p>Price: 3000 PKR</p>
+<button onclick="buy(2)">Buy Now</button>
+</div>
+
+<div class="card">
+<h2>3️⃣ Ultimate Website</h2>
+<p>Price: 5000 PKR</p>
+<button onclick="buy(3)">Buy Now</button>
+</div>
+
+<script>
+function buy(pkg) {
+  window.location.href =
+   `https://wa.me/923158479223?text=Hi%20I%20want%20package%20${pkg}`
+}
+</script>
+</body>
+  </html>
